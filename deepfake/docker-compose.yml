@@ -1,0 +1,49 @@
+
+services:
+  frontend:
+    build: ./frontend
+    container_name: deepfake-frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+    restart: always
+
+  backend:
+    build: ./backend
+    container_name: deepfake-backend
+    ports:
+      - "5000:5000"
+    env_file:
+      - ./backend/.env
+    depends_on:
+      - ml
+      - mongodb
+    restart: always
+
+  ml:
+    build: ./deepfake-detector
+    container_name: deepfake-ml
+    ports:
+      - "5050:5050"
+    restart: always
+
+  mongodb:
+    image: mongo:7
+    container_name: deepfake-mongodb
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: rootpass
+      MONGO_INITDB_DATABASE: deepfakeDB
+    volumes:
+      - mongo-data:/data/db
+    restart: always
+
+volumes:
+  mongo-data:
+
+networks:
+  default:
+    driver: bridge
